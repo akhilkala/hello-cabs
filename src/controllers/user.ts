@@ -5,15 +5,14 @@ import { route } from "../utils/utilities";
 export const getAll = route(async (req, res) => {
   const users = await User.findAll();
   res.status(200).json({
-    success: true,
-    data: users,
+    data: users.map((user) => ({ ...user, password: undefined })),
   });
 });
 
 export const getUserById = route(async (req, res) => {
   const user = await User.findById(req.params.id);
+  delete user.password;
   res.status(200).json({
-    success: true,
     data: user,
   });
 });
@@ -21,7 +20,11 @@ export const getUserById = route(async (req, res) => {
 export const getMyTrips = route(async (req, res) => {
   const trips = await Trip.findUserTrips(req.user.id);
   res.status(200).json({
-    success: true,
     data: trips,
   });
+});
+
+export const deposit = route(async (req, res) => {
+  await User.addBalance(req.user.id, req.body.amount);
+  res.sendStatus(200);
 });

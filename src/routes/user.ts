@@ -1,11 +1,25 @@
 import express from "express";
-import { getAll, getMyTrips, getUserById } from "../controllers/user";
+import { body } from "express-validator";
+import { getAll, getMyTrips, getUserById, deposit } from "../controllers/user";
 import protect from "../middleware/protect";
+import { validateRequest } from "../middleware/validateRequest";
 
 const router = express.Router();
 
+// Works
 router.get("/all", getAll);
 router.get("/myTrips", protect("user"), getMyTrips);
+
+// Works
+router.patch(
+  "/deposit",
+  protect("user"),
+  body("amount", "Amount is required").notEmpty(),
+  validateRequest,
+  deposit
+);
+
+// Works
 router.get("/:id", getUserById);
 
 export default router;

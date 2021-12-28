@@ -6,3 +6,5 @@ export interface Coordinate {
 }
 
 export type Route = (req: Request, res: Response, next: NextFunction) => any;
+
+// Types for typecript intellisence and type checking

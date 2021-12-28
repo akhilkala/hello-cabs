@@ -17,27 +17,37 @@ const insert = async (params: string[]) => {
   INSERT INTO "user" (
     name,
     email,
-    password
-    ) VALUES($1, $2, $3) ON CONFLICT DO NOTHING RETURNING *`,
+    password,
+    walletBalance
+    ) VALUES($1, $2, $3, $4) ON CONFLICT DO NOTHING RETURNING *;`,
     params
   );
 };
 
 const findAll = async () => {
-  const { rows } = await db.query(`SELECT * FROM "user"`);
+  const { rows } = await db.query(`SELECT * FROM "user";`);
   return rows;
 };
 
 const findByEmail = async (email: string) => {
-  const { rows } = await db.query(`SELECT * FROM "user" WHERE email = $1`, [
+  const { rows } = await db.query(`SELECT * FROM "user" WHERE email = $1;`, [
     email,
   ]);
   return rows[0];
 };
 
 const findById = async (id: string) => {
-  const { rows } = await db.query(`SELECT * FROM "user" WHERE id = $1`, [id]);
+  const { rows } = await db.query(`SELECT * FROM "user" WHERE id = $1;`, [id]);
   return rows[0];
+};
+
+const addBalance = async (id: string, balance: number) => {
+  await db.query(
+    `UPDATE "user"
+  SET walletBalance = walletBalance + $2
+  WHERE id = $1;`,
+    [id, balance]
+  );
 };
 
 export default {
@@ -46,4 +56,5 @@ export default {
   findAll,
   findByEmail,
   findById,
+  addBalance,
 };

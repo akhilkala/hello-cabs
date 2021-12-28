@@ -24,3 +24,5 @@ export default (option: Options) => {
     }
   };
 };
+// Function to verify if the user is logged in and if she is allowed to
+// access resources based on her role (driver / rider)

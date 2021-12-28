@@ -11,3 +11,4 @@ export const validateRequest = (
     throw new Error(JSON.stringify(errors.array().map((err) => err.msg)));
   next();
 };
+// Function to validate request by using express-validator

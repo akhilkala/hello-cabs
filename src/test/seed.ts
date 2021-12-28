@@ -203,23 +203,22 @@ const names = [
   "Ardal",
   "Ardeshir",
 ];
+// Array of 200 names
 
 (async () => {
   for (let i = 0; i < names.length; i++) {
     const password = await bcrypt.hash(names[i].toLowerCase(), 10);
 
-    const coords = `(${(Math.random() * 500).toFixed(2)}, ${(
-      Math.random() * 500
-    ).toFixed(2)})`;
-
     await Driver.insert([
       names[i],
       `${names[i].toLowerCase()}@gmail.com`,
       password,
-      "true",
       0,
-      coords,
+      (Math.random() * 500).toFixed(2),
+      (Math.random() * 500).toFixed(2),
+      false,
     ]);
     console.log(`${names[i].toLowerCase()}@gmail.com created`);
   }
 })();
+// Function to create 200 drivers that is called immediately

@@ -5,15 +5,14 @@ import { route } from "../utils/utilities";
 export const getAll = route(async (req, res) => {
   const drivers = await Driver.findAll();
   res.status(200).json({
-    success: true,
-    data: drivers,
+    data: drivers.map((driver) => ({ ...driver, password: undefined })),
   });
 });
 
 export const getDriverById = route(async (req, res) => {
   const driver = await Driver.findById(req.params.id);
+  delete driver.password;
   res.status(200).json({
-    success: true,
     data: driver,
   });
 });
@@ -21,7 +20,6 @@ export const getDriverById = route(async (req, res) => {
 export const getMyTrips = route(async (req, res) => {
   const trips = await Trip.findDriverTrips(req.user.id);
   res.status(200).json({
-    success: true,
     data: trips,
   });
 });
@@ -29,14 +27,11 @@ export const getMyTrips = route(async (req, res) => {
 export const getPosition = route(async (req, res) => {
   const pos = await Driver.getCurrentPosition(req.params.id);
   res.status(200).json({
-    success: true,
     data: pos,
   });
 });
 
 export const updatePosition = route(async (req, res) => {
   await Driver.updateCurrentPosition(req.params.id, req.body.position);
-  res.status(200).json({
-    success: true,
-  });
+  res.sendStatus(200);
 });

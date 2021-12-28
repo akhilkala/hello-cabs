@@ -14,6 +14,7 @@ import { isValidCoordinate } from "../utils/utilities";
 
 const router = express.Router();
 
+// Works
 router.get(
   "/details",
   body("source").custom(isValidCoordinate),
@@ -31,6 +32,7 @@ router.get(
 
 router.post(
   "/book",
+  protect("user"),
   body("source").custom(isValidCoordinate),
   body("destination").custom(isValidCoordinate),
   validateRequest,

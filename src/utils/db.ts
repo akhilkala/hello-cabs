@@ -3,6 +3,7 @@ import User from "../models/User";
 import Driver from "../models/Driver";
 
 import dotenv from "dotenv";
+import Trip from "../models/Trip";
 dotenv.config();
 
 if (
@@ -21,10 +22,14 @@ const pool = new Pool({
   database: process.env.PG_DATABSE,
   port: parseInt(process.env.PG_PORT || "5432"),
 });
+// Connecting to the database
 
 export const createTables = async () => {
   await User.createTable();
   await Driver.createTable();
+  await Trip.createTable();
+  await Driver.addForeignKey();
 };
+// Function to create databases if they don't already exist and to establish relationships
 
 export default pool;
