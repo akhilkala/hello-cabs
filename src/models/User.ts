@@ -7,7 +7,7 @@ const createTable = () =>
     name VARCHAR (128) NOT NULL,
     email VARCHAR (128) NOT NULL,
     password VARCHAR (128) NOT NULL,
-    walletBalance INT NOT NULL,
+    walletBalance FLOAT NOT NULL,
     PRIMARY KEY (id)
 )`);
 
@@ -41,12 +41,21 @@ const findById = async (id: string) => {
   return rows[0];
 };
 
-const addBalance = async (id: string, balance: number) => {
+const addBalance = async (id: string, amount: number) => {
   await db.query(
     `UPDATE "user"
   SET walletBalance = walletBalance + $2
   WHERE id = $1;`,
-    [id, balance]
+    [id, amount]
+  );
+};
+
+const removeBalance = async (id: string, amount: number) => {
+  await db.query(
+    `UPDATE "user"
+  SET walletBalance = walletBalance - $2
+  WHERE id = $1;`,
+    [id, amount]
   );
 };
 
@@ -57,4 +66,5 @@ export default {
   findByEmail,
   findById,
   addBalance,
+  removeBalance,
 };

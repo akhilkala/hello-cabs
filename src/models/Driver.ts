@@ -39,8 +39,9 @@ const insert = async (params: any[]) => {
   );
 };
 
-const findAll = async () => {
-  const { rows } = await db.query(`SELECT * FROM driver;`);
+const findAll = async (onlyId = false) => {
+  const query = onlyId ? `SELECT id FROM driver;` : `SELECT * FROM driver;`;
+  const { rows } = await db.query(query);
   return rows;
 };
 
@@ -79,10 +80,10 @@ const setCurrentTrip = async (id: string, tripId: string) => {
   await db.query(
     `
   UPDATE driver
-  SET currentTrip_id = $2
+  SET currentTrip_id = $2, goingToUser = $3
   WHERE id = $1;
     `,
-    [id, tripId]
+    [id, tripId, false]
   );
 };
 
@@ -108,14 +109,14 @@ const setGoingToUser = async (id: string) => {
   );
 };
 
-const resetGoingToUser = async (id: string) => {
+const setRating = async (id: string, rating: number) => {
   await db.query(
     `
   UPDATE driver
-  SET goingToUser = $2
+  SET rating = $2
   WHERE id = $1;
     `,
-    [id, true]
+    [id, rating]
   );
 };
 
@@ -131,5 +132,5 @@ export default {
   setCurrentTrip,
   completeTrip,
   setGoingToUser,
-  resetGoingToUser,
+  setRating,
 };

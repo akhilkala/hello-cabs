@@ -1,5 +1,6 @@
 import Driver from "../models/Driver";
 import Trip from "../models/Trip";
+import User from "../models/User";
 import { Coordinate } from "../utils/types";
 import {
   getCostToCoverDistance,
@@ -21,7 +22,7 @@ export const getTripDetails = route((req, res) => {
 });
 
 export const rateTrip = route(async (req, res) => {
-  const trip = await Trip.findTripUserId(req.params.id);
+  const trip = await Trip.findTripDetails(req.params.id);
   if (req.user.id !== trip.user_id) {
     return res.status(401).json({
       message: "User cannot rate this trip",
@@ -39,7 +40,14 @@ export const rateTrip = route(async (req, res) => {
 });
 
 export const startTrip = route(async (req, res) => {
-  const trip = await Trip.findTripUserId(req.params.id);
+  const trip = await Trip.findTripDetails(req.params.id);
+
+  if (!trip) {
+    return res.status(400).json({
+      message: "Invalid Trip ID",
+    });
+  }
+
   if (req.user.id !== trip.driver_id) {
     return res.status(401).json({
       message: "Driver cannot start this trip",
@@ -65,7 +73,14 @@ export const startTrip = route(async (req, res) => {
 });
 
 export const endTrip = route(async (req, res) => {
-  const trip = await Trip.findTripUserId(req.params.id);
+  const trip = await Trip.findTripDetails(req.params.id);
+
+  if (!trip) {
+    return res.status(400).json({
+      message: "Invalid Trip ID",
+    });
+  }
+
   if (req.user.id !== trip.driver_id) {
     return res.status(401).json({
       message: "Driver cannot end this trip",
@@ -85,6 +100,7 @@ export const endTrip = route(async (req, res) => {
   await Promise.all([
     Trip.end(req.params.id),
     Driver.completeTrip(req.user.id),
+    User.removeBalance(trip.user_id, trip.fare),
   ]);
 
   res.sendStatus(200);
@@ -157,7 +173,7 @@ const getAvailableDrivers = async (location: Coordinate) => {
 
   drivers = drivers.map((driver) => {
     let timeToLocation = -1;
-    if (!driver.currentTrip_id) {
+    if (!driver.currenttrip_id) {
       timeToLocation = getTimeToCoverDistance(
         getDistanceBetweenCoords(
           {
@@ -169,16 +185,22 @@ const getAvailableDrivers = async (location: Coordinate) => {
       );
     } else {
       const driverCurrentDestination = {
-        x_coordinate: driver.destination.x,
-        y_coordinate: driver.destination.y,
+        x_coordinate: driver.destination_x,
+        y_coordinate: driver.destination_y,
       };
+
+      console.log(
+        getTimeToCoverDistance(
+          getDistanceBetweenCoords(driverCurrentDestination, location)
+        )
+      );
 
       timeToLocation =
         getTimeToCoverDistance(
           getDistanceBetweenCoords(
             {
-              x_coordinate: driver.currentlocation.x,
-              y_coordinate: driver.currentlocation.y,
+              x_coordinate: driver.currentlocation_x,
+              y_coordinate: driver.currentlocation_y,
             },
             driverCurrentDestination
           )
@@ -191,5 +213,15 @@ const getAvailableDrivers = async (location: Coordinate) => {
     return { ...driver, timeToLocation };
   });
 
-  return drivers;
+  return drivers.map((driver) => ({
+    id: driver.id,
+    name: driver.name,
+    email: driver.email,
+    rating: driver.rating,
+    currentlyInTrip: !!driver.currenttrip_id,
+    tripscompleted: driver.tripscompleted,
+    currentlocation_x: driver.currentlocation_x,
+    currentlocation_y: driver.currentlocation_y,
+    timeToLocation: driver.timeToLocation,
+  }));
 };

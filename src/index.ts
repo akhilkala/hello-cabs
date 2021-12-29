@@ -2,13 +2,14 @@ import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
+import cron from "node-cron";
 
 import authRoutes from "./routes/auth";
 import driverRoutes from "./routes/driver";
 import userRoutes from "./routes/user";
 import tripRoutes from "./routes/trip";
 
-import { errorHandler } from "./utils/utilities";
+import { errorHandler, setDriverRatings } from "./utils/utilities";
 import { createTables } from "./utils/db";
 
 const app = express();
@@ -24,14 +25,8 @@ app.use("/user", userRoutes);
 app.use("/trip", tripRoutes);
 // Using routers
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any;
-    }
-  }
-}
-// Declaring type for intellisence
+cron.schedule("0 0 1 * *", setDriverRatings);
+// Running a cron job every month to update driver rating
 
 app.use("*", (req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({
@@ -48,10 +43,11 @@ app.listen(process.env.PORT, () => {
 });
 // Starting server and creating databases
 
-// Learn SQL (insert() function in models)
-// learn pg-node poll and stuff
-
-// IMPORTANT add balance / subtrating it and shit
-
-// startTime TIMESTAMP NOT NULL,
-//       endTime TIMESTAMP NOT NULL, IN CONTROLLER EDIT THESE
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
+// Declaring type for typescript intellisence

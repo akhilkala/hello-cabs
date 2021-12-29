@@ -5,6 +5,7 @@ COPY  package*.json ./
 RUN npm install -D
 COPY . .
 RUN npm run build
+RUN npm run seed
 
 FROM node:alpine
 WORKDIR /usr/src/app

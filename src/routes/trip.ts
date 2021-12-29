@@ -14,7 +14,6 @@ import { isValidCoordinate } from "../utils/utilities";
 
 const router = express.Router();
 
-// Works
 router.get(
   "/details",
   body("source").custom(isValidCoordinate),
@@ -42,7 +41,10 @@ router.post(
 router.patch(
   "/rate/:id",
   protect("user"),
-  body("rating").notEmpty(),
+  body("rating", "Rating must be a number between 0 and 5").isFloat({
+    min: 0,
+    max: 5,
+  }),
   validateRequest,
   rateTrip
 );

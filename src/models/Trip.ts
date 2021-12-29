@@ -29,7 +29,7 @@ const createTable = () =>
 const insert = async (params: string[]) => {
   return db.query(
     `
-    INSERT INTO driver (
+    INSERT INTO trip (
       driver_id,
       user_id,
       source_x,
@@ -45,11 +45,13 @@ const insert = async (params: string[]) => {
 };
 
 const findDriverTrips = async (id: string) => {
-  const { rows } = await db.query(`SELECT * FROM trip WHERE driver_id = $1;`, [
-    id,
-  ]);
+  const { rows } = await db.query(
+    // `SELECT * FROM trip JOIN "user" ON trip.user_id = "user".id WHERE driver_id = $1;`,
+    `SELECT * FROM trip WHERE driver_id = $1;`,
+    [id]
+  );
 
-  return rows[0];
+  return rows;
 };
 
 const findUserTrips = async (id: string) => {
@@ -57,12 +59,12 @@ const findUserTrips = async (id: string) => {
     id,
   ]);
 
-  return rows[0];
+  return rows;
 };
 
-const findTripUserId = async (id: string) => {
+const findTripDetails = async (id: string) => {
   const { rows } = await db.query(
-    `SELECT id, user_id, started, completed FROM trip WHERE id = $1;`,
+    `SELECT id, user_id , driver_id, started, completed, fare FROM trip WHERE id = $1;`,
     [id]
   );
 
@@ -81,7 +83,7 @@ const setRating = async (id: string, rating: number) => {
 const start = async (id: string) => {
   await db.query(
     `UPDATE trip
-  SET started = $2
+  SET started = $2, startTime = NOW()
   WHERE id = $1;`,
     [id, true]
   );
@@ -90,17 +92,17 @@ const start = async (id: string) => {
 const end = async (id: string) => {
   await db.query(
     `UPDATE trip
-  SET completed = $2
+  SET completed = $2, endTime = NOW()
   WHERE id = $1;`,
     [id, true]
   );
 };
 
 const findNearbyCabs = async (location: Coordinate, max = false) => {
-  // LEFT JOIN trip ON trip.id = driver.currentTrip_id
   const { rows } = await db.query(
-    `SELECT * 
+    `SELECT * , driver.id 
     FROM driver 
+    LEFT JOIN trip ON trip.id = driver.currentTrip_id
     WHERE sqrt(pow(driver.currentLocation_x - $1 ,2) + pow(driver.currentLocation_y - $2, 2)) < ${
       max ? MAX_PERMITTED_DISTANCE_TO_DRIVER : PERMITTED_DISTANCE_TO_DRIVER
     }
@@ -116,7 +118,7 @@ export default {
   findDriverTrips,
   findUserTrips,
   findNearbyCabs,
-  findTripUserId,
+  findTripDetails,
   setRating,
   start,
   end,

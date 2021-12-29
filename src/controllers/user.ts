@@ -11,6 +11,7 @@ export const getAll = route(async (req, res) => {
 
 export const getUserById = route(async (req, res) => {
   const user = await User.findById(req.params.id);
+
   delete user.password;
   res.status(200).json({
     data: user,

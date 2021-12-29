@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { CustomValidator } from "express-validator";
 import jwt from "jsonwebtoken";
+import Driver from "../models/Driver";
+import Trip from "../models/Trip";
 import { COST_PER_UNIT, TIME_TAKEN_PER_UNIT } from "./constants";
 import { Coordinate, Route } from "./types";
 
@@ -62,5 +64,19 @@ export const getTimeToCoverDistance = (distance: number) =>
 // Function that returns the time it will take to cover given distance
 
 export const getCostToCoverDistance = (distance: number) =>
-  COST_PER_UNIT * distance;
+  Math.ceil(COST_PER_UNIT * distance);
 // Function that returns the cost to cover given distance
+
+export const setDriverRatings = async () => {
+  const drivers = await Driver.findAll(true);
+  for (let i = 0; i < drivers.length; i++) {
+    const trips = await Trip.findDriverTrips(drivers[i].id);
+    let total = 0;
+    for (let j = 0; j < trips.length; j++) {
+      total += trips[j].rating;
+    }
+    await Driver.setRating(drivers[i].id, total / trips.length);
+  }
+};
+// Function to set drivers ratings
+// Can improve with SQL Agregate functions

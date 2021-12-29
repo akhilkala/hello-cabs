@@ -6,11 +6,8 @@ import { validateRequest } from "../middleware/validateRequest";
 
 const router = express.Router();
 
-// Works
 router.get("/all", getAll);
 router.get("/myTrips", protect("user"), getMyTrips);
-
-// Works
 router.patch(
   "/deposit",
   protect("user"),
@@ -18,8 +15,6 @@ router.patch(
   validateRequest,
   deposit
 );
-
-// Works
 router.get("/:id", getUserById);
 
 export default router;

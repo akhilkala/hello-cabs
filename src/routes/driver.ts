@@ -13,14 +13,10 @@ import { validateRequest } from "../middleware/validateRequest";
 
 const router = express.Router();
 
-// Works
 router.get("/all", getAll);
 router.get("/myTrips", protect("driver"), getMyTrips);
-// Works
 router.get("/:id", getDriverById);
-// Works
 router.get("/position/:id", getPosition);
-// Works
 router.patch(
   "/position/:id",
   body("position").custom(isValidCoordinate),
